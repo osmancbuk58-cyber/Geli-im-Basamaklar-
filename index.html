@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pediatrik Gelişim Basamakları · 0-2 yaş</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  body { font-family: 'Manrope', system-ui, sans-serif; }
+  .font-display { font-family: 'Fraunces', serif; letter-spacing: -0.01em; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  /* Hide scrollbar in age selector */
+  .scrollbar-thin::-webkit-scrollbar { height: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
+  /* Fade animation on age change */
+  .fade-in { animation: fadeIn 0.25s ease-out; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+
+<!-- Header -->
+<header class="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur sticky top-0 z-20">
+  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <i data-lucide="stethoscope" class="w-5 h-5 text-amber-400"></i>
+      <div>
+        <h1 class="text-base font-semibold font-display tracking-tight">Pediatrik Gelişim Basamakları</h1>
+        <p class="text-[11px] text-zinc-500 tracking-wide uppercase">0-2 yaş · klinik referans</p>
+      </div>
+    </div>
+    <span class="text-[10px] text-zinc-600 font-mono hidden sm:block">CDC 2022 · 50p</span>
+  </div>
+  <div class="border-t border-zinc-800/50 bg-zinc-900/30">
+    <div class="max-w-5xl mx-auto px-4 py-3 overflow-x-auto scrollbar-thin">
+      <div id="age-selector" class="flex gap-2 min-w-max"></div>
+    </div>
+  </div>
+</header>
+
+<!-- Content -->
+<main id="content" class="max-w-5xl mx-auto px-4 py-8"></main>
+
+<footer class="text-center text-[11px] text-zinc-600 pt-6 pb-8 mx-4 border-t border-zinc-900">
+  CDC 2022 milestone güncellemesi (50. persentil) · AAP Bright Futures · Türkiye Sağlık Bakanlığı izlem programı
+</footer>
+
+<script>
+const data = {
+  "1": {
+    label: "1 ay",
+    headline: "Fleksör tonus dönemi",
+    subhead: "Refleksler hakim, sosyal gülümseme henüz yok",
+    domains: {
+      "Kaba motor": ["Pron pozisyonda başını saniyeliğine yana çevirir", "Fizyolojik fleksör tonus belirgin (kol/bacak fleksiyonda)", "ATNR sık görülür"],
+      "İnce motor": ["Eller çoğunlukla yumruk halinde", "Palmar grasp kuvvetli", "20-30 cm mesafede yüzü kısa süreli takip eder"],
+      "Dil — reseptif": ["Yüksek seslere irkilir (Moro tetiklenir)", "Anne sesini tanır, konuşma sesine yönelir"],
+      "Dil — ekspresif": ["Refleksif ağlama", "Boğazsı sesler ('ggg', 'khhh')", "Sosyal sese yanıt sesi YOK"],
+      "Sosyal-duygusal": ["Kısa süreli göz teması", "Kucakta sakinleşir", "Sosyal gülümseme henüz YOK (6-8 haftada)"],
+      "Bilişsel": ["20-30 cm odakta net görür", "Yüksek kontrastlı görüntülere ilgi", "Tanıdık sesleri ayırt etmeye başlar"]
+    },
+    reflexes: [
+      { name: "Moro", info: "3-6 ay" },
+      { name: "Palmar grasp", info: "3-4 ay" },
+      { name: "Plantar grasp", info: "9-12 ay" },
+      { name: "ATNR", info: "4-6 ay" },
+      { name: "Rooting / emme", info: "4 ay (istemli olur)" },
+      { name: "Stepping", info: "2 ay" },
+      { name: "Galant", info: "4-6 ay" },
+      { name: "Babinski", info: "12-18 ay (normal)" }
+    ],
+    redFlags: [
+      "Hipotoni (floppy baby) → SMA, Down, hipotiroidi, sepsis, metabolik",
+      "Hipertoni / opistotonus → kernikterus, İK patoloji, hiperamonyemi",
+      "Asimetrik hareket → brakial pleksus, klavikula kırığı, hemiparezi",
+      "Beslenirken morarma → laringomalazi, TEF, kardiyak shunt",
+      "Sese yanıtsızlık → işitme taraması (OAE/AABR) kontrol",
+      "Sun-setting göz hareketi → artmış İK basınç (hidrosefali)",
+      "Persistan/ilerleyen sarılık, koyu idrar, açık dışkı → konjuge hiperbil → bilier atrezi"
+    ],
+    screening: [
+      "Yenidoğan topuk kanı (PKU, K. hipotiroidi, biotinidaz, KF, BAH, SCID, SMA)",
+      "İşitme taraması (OAE/AABR) sonucu kontrol",
+      "Kalça USG planı (4-6. hafta)",
+      "Kırmızı refleks muayenesi",
+      "Pulse oksimetre taraması (kritik KKH)"
+    ],
+    pearls: [
+      "1 ayda sosyal gülümseme YOK — normal. Aileler 'gülmüyor' diye getirir; 6-8 haftaya kadar bekle.",
+      "Asimetrik Moro → klavikula kırığı + brakial pleksusu mutlaka muayene et.",
+      "Floppy bebek: santralde DTR normal/artmış, periferikte (SMA Tip 1!) DTR alınmaz, dil fasikülasyonu olabilir.",
+      "Konjuge hiperbilirubinemi acildir. Direkt bil >1 mg/dL ya da total'in %20'sini geçiyorsa Kasai 60 günü geçirme."
+    ]
+  },
+  "2": {
+    label: "2 ay",
+    headline: "Sosyal gülümseme miladı",
+    subhead: "İlk gerçek sosyal etkileşim, cooing başlar",
+    domains: {
+      "Kaba motor": ["Pron pozisyonda başını 45° kaldırır", "Sırtüstünde başını orta hatta tutmaya başlar", "Fleksör tonus azalmaya başlar"],
+      "İnce motor": ["Eller açılmaya başlar, hala dominantlık yumrukta", "Elleri orta hatta getirebilir", "Yüze götürür"],
+      "Dil — reseptif": ["Sese döner", "Yumuşak sese sakinleşir", "Tanıdık sese yönelir"],
+      "Dil — ekspresif": ["Cooing — ünlü sesler ('aaa', 'ooo', 'eee')", "Sosyal sese yanıt olarak ses çıkarmaya başlar"],
+      "Sosyal-duygusal": ["SOSYAL GÜLÜMSEME — anne yüzüne yanıt olarak güler", "Yüze uzun süreli bakar", "Etkileşimden hoşlanır"],
+      "Bilişsel": ["Yüz takibi orta hattı geçer", "180° yatay takip", "Dikey takip başlangıcı"]
+    },
+    reflexes: [
+      { name: "Moro", info: "Hala mevcut, kaybolma 3-6 ay" },
+      { name: "Palmar grasp", info: "Hala mevcut, kaybolma 3-4 ay" },
+      { name: "ATNR", info: "Hala mevcut, kaybolma 4-6 ay" },
+      { name: "Stepping", info: "Kaybolmaya başlar" }
+    ],
+    redFlags: [
+      "Sosyal gülümseme yok (8 haftaya kadar bekle, sonra dikkat)",
+      "Sese yanıtsızlık → işitme tekrar değerlendir",
+      "Yüze odaklanmama, persistan görsel ilgisizlik → görme",
+      "Persistan irritabilite, sakinleşememe",
+      "Tartı alımı yetersiz, beslenme zorluğu",
+      "Asimetrik hareket veya tonus",
+      "Baş çevresi büyüme hızında sapma (mikro/makrosefali izlemi)"
+    ],
+    screening: [
+      "2. ay aşıları (5'li karma 1, OPA 1, KPA 1, Hep B 2, Rota 1)",
+      "Sağlam çocuk muayenesi — boy/kilo/BÇ persentil takibi",
+      "Kırmızı refleks tekrar",
+      "Kalça muayenesi + USG sonuç kontrolü"
+    ],
+    pearls: [
+      "2 ay = sosyal gülümseme miladı. 8 haftada hala yoksa nörogelişimsel değerlendirme tetikle.",
+      "Cooing varlığı işitmenin işlevsel kanıtı değildir — OAE/AABR zorunlu.",
+      "Bu yaşta 'kolik' tanısı koymadan önce inek sütü alerjisi, GÖR, idrar yolu enfeksiyonu, kıl turnikesini düşün.",
+      "Baş çevresi 2 standart sapma üzerinde + huzursuzluk + kusma → hidrosefali ekarte et."
+    ]
+  },
+  "4": {
+    label: "4 ay",
+    headline: "Baş kontrolü ve elin keşfi",
+    subhead: "Kahkaha, orta hatta el birleşmesi, raking grasp",
+    domains: {
+      "Kaba motor": ["Pron pozisyonda başını 90° kaldırır, dirseklerine yaslanır", "Baş kontrolü oturur (head lag minimal)", "Sırtüstünden yana dönmeye başlar"],
+      "İnce motor": ["Eller orta hatta birleşir", "Objeyi yakalar (raking grasp)", "Eline geleni ağzına götürür (oral eksplorasyon)"],
+      "Dil — reseptif": ["Sesin kaynağına döner", "Konuşma tonlamasını ayırt eder"],
+      "Dil — ekspresif": ["Sesli kahkaha", "Yüksek-alçak ses varyasyonu", "Sesle iletişim kurmaya çalışır"],
+      "Sosyal-duygusal": ["Sesli güler, yüzleri tanır", "Etrafa belirgin ilgi", "Bakım verene tepki belirginleşir"],
+      "Bilişsel": ["Düşürülen objeyi takip eder", "Neden-sonuç başlangıcı (çıngırak salla → ses)", "Aynaya ilgi"]
+    },
+    reflexes: [
+      { name: "Moro", info: "Kaybolmaya başlar (3-6 ay)" },
+      { name: "ATNR", info: "Kaybolmaya başlar" },
+      { name: "Palmar grasp", info: "Zayıflıyor" }
+    ],
+    redFlags: [
+      "BAŞ KONTROLÜ YOK (head lag) — ciddi nörolojik alarm",
+      "Eller hala yumruk, orta hatta gelmiyor → SP",
+      "Gülmüyor, ses çıkarmıyor → işitme + nörogelişimsel",
+      "Persistan primitif refleks (Moro hala kuvvetli)",
+      "Sırt üstünden yana dönemiyor (5-6'da kritik)",
+      "EL TERCİHİ — 4 aydan önce → kontralateral hemiparezi/SP"
+    ],
+    screening: [
+      "4. ay aşıları (5'li 2, OPA 2, KPA 2, Rota 2)",
+      "Sağlam çocuk — büyüme persentilleri",
+      "Beslenme değerlendirmesi (anne sütü tek başına 6 aya kadar)"
+    ],
+    pearls: [
+      "4 aydan önce el tercihi ASLA normal değil — kontralateral hemiparezi/SP'ye kadar gider.",
+      "Head lag pull-to-sit manevrasıyla muayene edilir; 4 ayda baş gövdeyle birlikte gelmeli.",
+      "Kahkaha — işitsel-sosyal entegrasyonun göstergesi. Yoksa hem işitme hem etkileşim ekarte.",
+      "Persistan Moro 6 aydan sonra → SP'ye kadar giden bir sinyal."
+    ]
+  },
+  "6": {
+    label: "6 ay",
+    headline: "Oturma ve babbling başlangıcı",
+    subhead: "Primitif refleksler bitti, postural refleksler geliyor",
+    domains: {
+      "Kaba motor": ["Destekle/kısa süre desteksiz oturur", "Sırtüstünden yüzüstüne döner", "Baş kontrolü tam"],
+      "İnce motor": ["Objeyi bir elden diğerine geçirir", "Palmar grasp olgunlaşır (henüz pinser değil)", "Her iki eli kullanır (henüz tercih yok)"],
+      "Dil — reseptif": ["Adına dönmeye başlar", "Tanıdık-yabancı sesi ayırt eder"],
+      "Dil — ekspresif": ["BABBLING başlar (ba-ba, ma-ma — anlamsız ama heceli)", "Çeşitli ses oyunları"],
+      "Sosyal-duygusal": ["Tanıdık-yabancı ayrımı başlar", "Ayna ilgisi", "Etkileşimde aktif rol"],
+      "Bilişsel": ["Cisim sürekliliği başlangıcı", "Düşen objeyi arar (kısa süreli)", "Çevresel keşif"]
+    },
+    reflexes: [
+      { name: "Primitif refleksler", info: "ÇOĞU KAYBOLMUŞ olmalı (Moro, ATNR yok)" },
+      { name: "Postural refleksler", info: "Gelişmeye başlıyor" }
+    ],
+    redFlags: [
+      "Desteksiz oturamıyor (8 ayda mutlaka olmalı)",
+      "Babbling YOK → işitme önce ekarte (OAE/AABR yenile)",
+      "Yüze gülmüyor, etkileşim yok",
+      "Persistan Moro → ciddi nörolojik alarm",
+      "Hipotoni / hipertoni",
+      "Tek el kullanımı → hemiparezi",
+      "Adına dönmüyor"
+    ],
+    screening: [
+      "6. ay aşıları (5'li 3, OPA 3, Hep B 3)",
+      "Türkiye programı: demir profilaksisi başlangıcı",
+      "Hemoglobin değerlendirmesi (anemi taraması)",
+      "ASQ-3 uygulanabilir",
+      "Ek gıdaya geçiş danışmanlığı"
+    ],
+    pearls: [
+      "6 ay = babbling başlangıç yaşı. Yoksa işitme + nörolojik değerlendirme zorunlu.",
+      "Persistan primitif refleks 6 aydan sonra → motor sistem patolojisi.",
+      "Demir profilaksisi 4. aydan başlar (TR Bakanlık), 1 mg/kg/gün; ek gıda başlayınca diyet öncelikli.",
+      "Bu yaşta 'oturuyor' demek için 1 dakika desteksiz oturma + denge tepkileri olmalı."
+    ]
+  },
+  "9": {
+    label: "9 ay",
+    headline: "Mobilite + yabancı kaygısı",
+    subhead: "Emekleme, pull-to-stand, joint attention başlangıcı",
+    domains: {
+      "Kaba motor": ["Desteksiz iyi oturur, kendi kendine oturur", "Emekleme (varyasyonlar normal: bear, scoot, bottom shuffle)", "Pull-to-stand (destekle ayağa kalkar)"],
+      "İnce motor": ["Pincer grasp gelişiyor (immatur)", "İki eli koordineli kullanır", "Parmakla küçük şeyleri toplar"],
+      "Dil — reseptif": ["'Hayır' anlar", "Basit komut başlangıcı", "İsmine net döner"],
+      "Dil — ekspresif": ["Çeşitli babbling (mama, baba, dada — henüz anlamsız)", "Tonlama varyasyonu", "Ses taklidi"],
+      "Sosyal-duygusal": ["YABANCI KAYGISI", "Ayrılık kaygısı", "Peek-a-boo, taklit oyunları", "Joint attention başlangıcı"],
+      "Bilişsel": ["Cisim sürekliliği oturur (örtülen oyuncağı arar)", "Kasıtlı davranış", "Araç kullanımı başlangıcı"]
+    },
+    reflexes: [
+      { name: "Parachute refleksi", info: "Gelişir (kalıcı)" },
+      { name: "Lateral propping", info: "Gelişir" },
+      { name: "Plantar grasp", info: "Kaybolur (9-12 ay)" }
+    ],
+    redFlags: [
+      "Desteksiz oturamıyor → ciddi alarm",
+      "İlgisiz, etkileşim zayıf → otizm spektrumu",
+      "Babbling yok, adına dönmüyor",
+      "El kullanımı asimetrik",
+      "Pull-to-stand denemiyor",
+      "Yabancı kaygısı hiç yok → sosyal gelişim alarmı"
+    ],
+    screening: [
+      "9. ay sağlam çocuk muayenesi",
+      "ASQ-3 önerilen yaş",
+      "Hemoglobin / demir taraması (TR programı)",
+      "Beslenme: Fe, Zn, B12 sorgulaması (vejetaryen ailelerde dikkat)"
+    ],
+    pearls: [
+      "Yabancı kaygısı yokluğu — sosyal etkileşim için erken işaret. Joint attention'a bak.",
+      "Joint attention = bakışını yönlendirme; senin baktığın yere bakmak. 9-12 ayda gelmeli.",
+      "Emekleme zorunlu değil — bottom shuffle/scoot da normal varyasyon. Ama hareketlilik mutlaka olmalı.",
+      "Bu yaşta el tercihi hala normal değil — 18-24 aya kadar bilateral kullanım beklenir."
+    ]
+  },
+  "12": {
+    label: "12 ay",
+    headline: "İlk kelime, işaret etme, cruising",
+    subhead: "Otizm taraması başlangıcı — 3 alarm noktası burada",
+    domains: {
+      "Kaba motor": ["Mobilya tutarak yürüme (cruising)", "Bağımsız 1-2 adım atabilir", "Destekle ayakta durur"],
+      "İnce motor": ["Olgun pincer grasp (parmak ucuyla)", "Bardaktan denerken içer", "Objeleri kaba kullanır"],
+      "Dil — reseptif": ["1-3 basit komut anlar", "Vücut parçalarına bakar", "Yasaklara tepki verir"],
+      "Dil — ekspresif": ["İLK ANLAMLI KELİME (mama/baba spesifik kullanımıyla)", "1-3 anlamlı kelime", "Jargon (anlamsız konuşma akışı) başlangıcı"],
+      "Sosyal-duygusal": ["İŞARET ETME (proto-imperative)", "Bay-bay yapar", "Alkış", "Sosyal referans (yeni durumda anneye bakar)"],
+      "Bilişsel": ["Cisim sürekliliği tam", "Basit taklit", "Fonksiyonel oyun başlangıcı"]
+    },
+    redFlags: [
+      "JOINT ATTENTION YOK → otizm için kritik",
+      "İŞARET ETME YOK (12-14 ay) → otizm",
+      "Anlamlı kelime hiç yok",
+      "Adına dönmüyor",
+      "Yürüme denemiyor (cruising bile yok) — 15 ay sınır",
+      "Anlamlı jest yok (bay-bay, alkış)",
+      "Persistan ekolali"
+    ],
+    screening: [
+      "12. ay aşıları: KKK, Su çiçeği, Hep A 1, KPA 4, OPA 4",
+      "Sağlam çocuk + Hb",
+      "ASQ-3 önerilen",
+      "Otizm için 3 alarm noktası kontrol",
+      "Diş muayenesi danışmanlığı (1 yaş)"
+    ],
+    pearls: [
+      "12 ayda otizm taraması başlasın. 3 ALARM: işaret etme yok, joint attention yok, ismine dönmüyor.",
+      "Bu yaşta yaptığın gözlem 18-24 ay M-CHAT-R'ı tamamlar.",
+      "İlk kelime için kriterleri sıkı tut: spesifik objeyi/kişiyi kastetmeli. Babası dışında 'baba' demek anlamlı değil.",
+      "Cruising 9-12 ay normal, bağımsız yürüme 12-15 ay normal aralık. 18 ay ÜST SINIR.",
+      "1 yaşta inek sütü başlanabilir — ama 1 yaşa kadar formula veya anne sütü, demir eksikliği önemli."
+    ]
+  },
+  "15": {
+    label: "15 ay",
+    headline: "Bağımsız yürüyüş",
+    subhead: "Regresyon = her zaman patolojik",
+    domains: {
+      "Kaba motor": ["Bağımsız yürür (12-15 ay normal aralık, 18 ay ÜST)", "Eğilip oyuncak alır", "Destekle merdiven çıkmaya başlar"],
+      "İnce motor": ["2 küp üst üste", "Kaşıkla denerek yer", "Çiziktirme başlangıcı"],
+      "Dil — reseptif": ["1 basamak komut yapar (top getir)", "5-10 vücut parçası gösterir"],
+      "Dil — ekspresif": ["3-5 anlamlı kelime", "Jargon belirgin", "İstediğini sesle ifade eder"],
+      "Sosyal-duygusal": ["Anneyle bağ güçlü", "Basit istekler", "Bağımsızlık denemeleri"],
+      "Bilişsel": ["Fonksiyonel oyun başlangıcı (telefonu kulağa)", "Taklit oyunu"]
+    },
+    reflexes: null,
+    redFlags: [
+      "YÜRÜMÜYOR — 15'te uyarı, 18'de mutlaka değerlendir",
+      "Hiç anlamlı kelime yok",
+      "İşaret etmiyor",
+      "REGRESYON — KAZANILMIŞ BECERİYİ KAYBETME",
+      "Etkileşim azalıyor",
+      "Tek başına oyun, sosyal yokluk"
+    ],
+    screening: [
+      "15. ay sağlam çocuk",
+      "ASQ-3",
+      "Aşı: KPA 4 (yapılmadıysa)",
+      "Süt + demir alımı sorgulaması"
+    ],
+    pearls: [
+      "REGRESYON HER ZAMAN PATOLOJİK. Konuşmaya başlayıp kaybeden çocuk → otizm, Rett (kız), Landau-Kleffner, metabolik nörodejeneratif hastalık.",
+      "Yürüme 12-15 ay aralığında. 18 ay sınır — geçti mi DMD (CK!), SP, kalça displazisi, hipotonik miyopati.",
+      "Erkek çocukta 18 ayda yürümüyor → CK iste. DMD'yi atlama!",
+      "Tek tip oyun, repetitif (sıraya dizme, dönen şeyler) → otizm spektrumu için sinyal."
+    ]
+  },
+  "18": {
+    label: "18 ay",
+    headline: "Sembolik oyun ve M-CHAT-R zamanı",
+    subhead: "10-25 kelime, 2 kelimeli kombinasyon başlangıcı",
+    domains: {
+      "Kaba motor": ["Koşmaya başlar (acemi)", "Geri geri yürür", "Çekilen oyuncağı çeker", "Destekle merdiven çıkar"],
+      "İnce motor": ["3-4 küp üst üste", "Çiziktirir (kasıtlı)", "Kaşığı kullanır", "Kitap sayfasını çevirir (çoklu)"],
+      "Dil — reseptif": ["1-2 basamak komut (büyük objeyi al)", "3-5 vücut parçası gösterir", "Tanıdık objeleri tanır"],
+      "Dil — ekspresif": ["10-25 kelime", "'Anne su' tarzı 2 kelimeli kombinasyon başlangıcı", "İsim öğrenme patlaması başlar"],
+      "Sosyal-duygusal": ["SEMBOLİK OYUN (bebeği besler, telefonla konuşur)", "Bağımsızlık + 'hayır' dönemi", "Anne-figürle bağlanma sınanır"],
+      "Bilişsel": ["Kendini aynada tanır", "Basit problem çözme", "Cisimleri kategorize etmeye başlar"]
+    },
+    reflexes: null,
+    redFlags: [
+      "Yürüme YOK — DMD, SP, kalça displazisi mutlaka değerlendir",
+      "<10 kelime → konuşma değerlendirmesi",
+      "SEMBOLİK OYUN YOK → otizm",
+      "Regresyon",
+      "İşaret etme hala yok",
+      "Joint attention yok"
+    ],
+    screening: [
+      "M-CHAT-R/F UYGULA (18-24 ay arası altın yaş)",
+      "18. ay sağlam çocuk",
+      "Aşı: 5'li 4, OPA 4, Hep A 2",
+      "Demir + Hb kontrolü"
+    ],
+    pearls: [
+      "M-CHAT-R 18 ayda mutlaka uygula. Pozitif (≥3 risk) → follow-up interview (M-CHAT-R/F), gerekirse erken müdahale yönlendir.",
+      "Erken müdahale (özel eğitim, davranışsal) ASD'de uzun dönem sonuçları belirgin değiştirir.",
+      "Konuşma gecikmesi: <10 kelime + 2 kelimeli kombinasyon yok → konuşma terapisi konsültasyonu.",
+      "Sembolik oyun yok + işaret yok + joint attention yok = klasik üçlü, ASD için yüksek risk."
+    ]
+  },
+  "24": {
+    label: "24 ay",
+    headline: "50+ kelime, 2 kelimeli cümle",
+    subhead: "Anlaşılırlık formülü: yaş(yıl)/4 = aile için",
+    domains: {
+      "Kaba motor": ["İyi koşar", "Merdiven çıkar (iki ayağı aynı basamağa)", "Top tekmeler", "Sandalyeye tırmanır"],
+      "İnce motor": ["6-7 küp üst üste", "Dikey çizgi taklit", "Kapı/kapak açar", "Kaşığı/çatalı kullanır"],
+      "Dil — reseptif": ["2 basamak komut yapar", "İsimlendirme zenginleşir", "Soru anlama başlar"],
+      "Dil — ekspresif": ["50+ KELİME", "2 KELİMELİ CÜMLELER (anne su ver)", "Anlaşılırlık ~%50 (aile için)"],
+      "Sosyal-duygusal": ["Yan yana oyun (parallel play)", "Kendini ifade eder", "Sahiplik duygusu ('benim')", "Tuvalet eğitimi başlangıcı (hazırlık işaretleri)"],
+      "Bilişsel": ["Cisim sürekliliği tam", "Basit problem çözme", "Renk/şekil eşleştirme başlangıcı"]
+    },
+    reflexes: null,
+    redFlags: [
+      "<50 KELİME, 2 kelimeli cümle yok → konuşma terapisi",
+      "Anlaşılırlık <%25",
+      "Sembolik oyun yok",
+      "Sosyal etkileşim zayıf",
+      "Persistan EKOLALİ",
+      "Regresyon",
+      "Tırmanma/koşma yok → motor değerlendirme"
+    ],
+    screening: [
+      "M-CHAT-R/F (yapılmadıysa)",
+      "24. ay sağlam çocuk",
+      "Aşı: KKK 2, Su çiçeği 2",
+      "Diş muayenesi",
+      "ASQ-3"
+    ],
+    pearls: [
+      "Anlaşılırlık formülü: yaş(yıl)/4 = aile için anlaşılma oranı; yabancı için yaş/4 - 1. 2 yaşta aile %50, yabancı %25.",
+      "'Late talker' vs 'language disorder' ayrımı: late talker'da anlama normal, ekspresif gerilik var. Disorder'da reseptif de etkili.",
+      "Persistan ekolali (papağan gibi tekrar) ASD için tipik.",
+      "2 yaşta tuvalet eğitimi BAŞLANGIÇ — zorlama yok. Hazırlık işaretleri: kuru kalma süresi, ifade etme, iletişim becerileri.",
+      "Bu yaşta 'kelime sayısı + cümle yapısı + anlaşılırlık' üçlüsü dil gelişiminin omurgasıdır."
+    ]
+  }
+};
+
+const ages = ["1", "2", "4", "6", "9", "12", "15", "18", "24"];
+
+const domainIcons = {
+  "Kaba motor": "activity",
+  "İnce motor": "hand",
+  "Dil — reseptif": "ear",
+  "Dil — ekspresif": "message-circle",
+  "Sosyal-duygusal": "users",
+  "Bilişsel": "brain"
+};
+
+let selectedAge = "1";
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderAgeSelector() {
+  const container = document.getElementById("age-selector");
+  container.innerHTML = ages.map(a => {
+    const isSel = a === selectedAge;
+    const cls = isSel
+      ? "bg-amber-400 text-zinc-950 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.25)]"
+      : "bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800";
+    return `<button data-age="${a}" class="age-btn px-4 py-2 rounded-md text-sm font-medium font-mono transition-all whitespace-nowrap border ${cls}">${data[a].label}</button>`;
+  }).join("");
+  container.querySelectorAll(".age-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedAge = btn.dataset.age;
+      renderAll();
+    });
+  });
+}
+
+function sectionTitle(icon, label, accent) {
+  const colorMap = { red: "text-red-400", amber: "text-amber-400", default: "text-zinc-400" };
+  const color = colorMap[accent] || colorMap.default;
+  return `
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="${icon}" class="w-4 h-4 ${color}"></i>
+      <h3 class="text-xs uppercase tracking-[0.15em] text-zinc-400 font-semibold">${escapeHtml(label)}</h3>
+      <span class="h-px flex-1 bg-zinc-800/70"></span>
+    </div>`;
+}
+
+function renderContent() {
+  const d = data[selectedAge];
+  const main = document.getElementById("content");
+
+  // Hero
+  let html = `
+    <section class="mb-10 fade-in">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="text-[11px] text-amber-400 uppercase tracking-widest font-mono">${escapeHtml(d.label)}</span>
+        <span class="h-px flex-1 bg-zinc-800"></span>
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-semibold font-display leading-tight mb-2" style="letter-spacing:-0.02em">${escapeHtml(d.headline)}</h2>
+      <p class="text-zinc-400 text-base">${escapeHtml(d.subhead)}</p>
+    </section>`;
+
+  // Domains
+  html += `<section class="mb-10 fade-in">${sectionTitle("activity", "Beklenen Milestone'lar")}<div class="grid sm:grid-cols-2 gap-3">`;
+  for (const [domain, items] of Object.entries(d.domains)) {
+    const icon = domainIcons[domain] || "activity";
+    html += `
+      <div class="bg-zinc-900/60 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors">
+        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-800">
+          <i data-lucide="${icon}" class="w-4 h-4 text-amber-400/80"></i>
+          <h4 class="text-sm font-semibold text-zinc-200">${escapeHtml(domain)}</h4>
+        </div>
+        <ul class="space-y-1.5">
+          ${items.map(it => `<li class="text-sm text-zinc-300 leading-relaxed flex gap-2"><span class="text-amber-400/60 mt-1 text-[8px]">●</span><span>${escapeHtml(it)}</span></li>`).join("")}
+        </ul>
+      </div>`;
+  }
+  html += `</div></section>`;
+
+  // Reflexes
+  if (d.reflexes && d.reflexes.length > 0) {
+    html += `<section class="mb-10 fade-in">${sectionTitle("heart", "Primitif / Postural Refleksler")}
+      <div class="bg-zinc-900/60 border border-zinc-800 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-900 border-b border-zinc-800">
+            <tr>
+              <th class="text-left px-4 py-2 text-xs uppercase tracking-wide text-zinc-500 font-medium">Refleks</th>
+              <th class="text-left px-4 py-2 text-xs uppercase tracking-wide text-zinc-500 font-medium">Durum / Kaybolma</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${d.reflexes.map(r => `<tr class="border-t border-zinc-800/50"><td class="px-4 py-2.5 text-zinc-200 font-medium">${escapeHtml(r.name)}</td><td class="px-4 py-2.5 text-zinc-400 font-mono text-[13px]">${escapeHtml(r.info)}</td></tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+  }
+
+  // Red Flags
+  html += `<section class="mb-10 fade-in">${sectionTitle("alert-triangle", "Kırmızı Bayraklar", "red")}
+    <div class="bg-red-950/20 border border-red-900/40 rounded-lg p-4">
+      <ul class="space-y-2.5">
+        ${d.redFlags.map((f, i) => `<li class="text-sm text-zinc-200 leading-relaxed flex gap-3"><span class="text-red-400 font-mono text-xs mt-0.5 shrink-0">${String(i+1).padStart(2,"0")}</span><span>${escapeHtml(f)}</span></li>`).join("")}
+      </ul>
+    </div>
+  </section>`;
+
+  // Screening
+  html += `<section class="mb-10 fade-in">${sectionTitle("stethoscope", "Tarama / Değerlendirme")}
+    <div class="bg-zinc-900/60 border border-zinc-800 rounded-lg p-4">
+      <ul class="space-y-2">
+        ${d.screening.map(s => `<li class="text-sm text-zinc-300 leading-relaxed flex gap-3"><span class="text-sky-400/70 mt-1 text-[8px]">▪</span><span>${escapeHtml(s)}</span></li>`).join("")}
+      </ul>
+    </div>
+  </section>`;
+
+  // Pearls
+  html += `<section class="mb-12 fade-in">${sectionTitle("lightbulb", "Klinik İnci", "amber")}
+    <div class="space-y-3">
+      ${d.pearls.map(p => `<blockquote class="bg-gradient-to-br from-amber-950/30 to-zinc-900/40 border-l-2 border-amber-400/70 rounded-r-md px-4 py-3"><p class="text-sm text-zinc-200 leading-relaxed italic font-display">${escapeHtml(p)}</p></blockquote>`).join("")}
+    </div>
+  </section>`;
+
+  main.innerHTML = html;
+}
+
+function renderAll() {
+  renderAgeSelector();
+  renderContent();
+  if (window.lucide) lucide.createIcons();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.addEventListener("DOMContentLoaded", renderAll);
+</script>
+</body>
+</html>
